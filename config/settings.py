@@ -86,6 +86,8 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+AUTH_USER_MODEL = "users.User"
+
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
@@ -128,7 +130,7 @@ STATICFILES_DIRS = [
 ]
 # Absolute path to the directory where files are collected for production
 # This must be a separate directory outside your source folders
-STATIC_ROOT = (os.path.join(BASE_DIR, "staticfiles"),)
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
