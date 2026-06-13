@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -29,8 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "users"
-    "library"
+    "users" "library",
 ]
 
 MIDDLEWARE = [
@@ -129,8 +130,9 @@ STATICFILES_DIRS = [
     # если они располагаются вне приложений
     os.path.join(BASE_DIR, "static"),
 ]
-# STATIC_ROOT = os.path.join(BASE_DIR, "static"),
+# Absolute path to the directory where files are collected for production
+# This must be a separate directory outside your source folders
+STATIC_ROOT = (os.path.join(BASE_DIR, "staticfiles"),)
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
