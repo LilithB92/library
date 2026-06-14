@@ -11,4 +11,12 @@ class UserAdmin(admin.ModelAdmin):
     Супер позволяет управлять пользователями и их активностью.
     """
 
-    list_display = ("id", "full_name", "email", "phone_number", "avatar", "address", "is_active")
+    list_display = (
+        "id",
+        "full_name",
+        "email",
+        "phone_number",
+        "avatar",
+        "address",
+        "is_active",
+    )
