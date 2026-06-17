@@ -1,3 +1,5 @@
+from datetime import date
+
 from rest_framework import serializers
 
 from library.models import Author, Book
@@ -46,3 +48,18 @@ class BookSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
+    def validate(self, data):
+        """Валидация атрибутов(data:{get}) модели Книг"""
+        # 1. Проверка: У книги есть автор
+        if not data.get("authors"):
+            raise serializers.ValidationError("Книга не может быть без автора.")
+        # 1. Проверка: год публикации
+        current_year = date.today().year
+        if (data.get("published_year") > current_year) or (
+            data.get("published_year") < 868
+        ):
+            raise serializers.ValidationError(
+                "Год публикации не может быть меньше чем год публикации первой книги(868) и не больше текущего года."
+            )
+        return data
