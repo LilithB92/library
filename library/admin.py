@@ -35,6 +35,7 @@ class BookAdmin(admin.ModelAdmin):
         "published_year",
     )
 
+
 @admin.register(BorrowRecord)
 class BorrowRecordAdmin(admin.ModelAdmin):
     """
@@ -49,5 +50,5 @@ class BorrowRecordAdmin(admin.ModelAdmin):
         "borrow_date",
         "return_date",
         "is_returned",
-        "due_date"
+        "due_date",
     )
