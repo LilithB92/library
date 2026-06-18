@@ -1,5 +1,9 @@
+from datetime import timedelta
+
 from django.db import models
 from django_countries.fields import CountryField
+
+from config.settings import AUTH_USER_MODEL
 
 
 class Author(models.Model):
@@ -58,3 +62,25 @@ class Book(models.Model):
     class Meta:
         verbose_name = "Книга"
         verbose_name_plural = "Книги"
+
+
+class BorrowRecord(models.Model):
+    """Сохраняет одну запись о выдачи книг, связанно с:models:`Book`, `User`,"""
+
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    borrow_date = models.DateTimeField(auto_now_add=True)
+    return_date = models.DateTimeField(null=True, blank=True)
+    is_returned = models.BooleanField(default=False)
+
+    @property
+    def due_date(self):
+        """Вычисляемая дата возврата."""
+        return self.borrow_date + timedelta(days=10)
+
+    def __str__(self):
+        return f"{self.user.full_name} - {self.book.title}"
+
+    class Meta:
+        verbose_name = "Выдача книг"
+        verbose_name_plural = "Выдачи книги"
