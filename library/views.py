@@ -3,9 +3,11 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers, status, viewsets
 from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from library.models import Author, Book, BorrowRecord
+from library.permissions import IsLibrarian
 from library.serializers import (AuthorSerializer, BookSerializer,
                                  BorrowRecordSerializer)
 
@@ -15,6 +17,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
     serializer_class = AuthorSerializer
     queryset = Author.objects.all().order_by("pk")
+    permission_classes = (IsAuthenticated, IsLibrarian)
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -24,6 +27,7 @@ class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all().order_by("pk")
     # Указываем поля, по которым можно искать (точное совпадение)
     filterset_fields = ["genre", "published_year", "title"]
+    permission_classes = (IsAuthenticated, IsLibrarian)
 
 
 class BorrowBookApiView(CreateAPIView):
