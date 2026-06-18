@@ -1,7 +1,8 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import serializers, status, viewsets
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView
 from rest_framework.response import Response
 
 from library.models import Author, Book, BorrowRecord
@@ -30,14 +31,6 @@ class BorrowBookApiView(CreateAPIView):
 
     queryset = BorrowRecord.objects.all().select_related("book", "user")
     serializer_class = BorrowRecordSerializer
-
-    def get_serializer_context(self):
-        """Добавляем book и request в контекст сериализатора"""
-        context = super().get_serializer_context()
-        book_pk = self.kwargs.get("pk")
-        book = get_object_or_404(Book, pk=book_pk)
-        context["book"] = book
-        return context
 
     def perform_create(self, serializer):
         book_pk = self.kwargs.get("pk")
@@ -96,3 +89,40 @@ class BorrowBookApiView(CreateAPIView):
 class BorrowBookListAPIView(ListAPIView):
     queryset = BorrowRecord.objects.all()
     serializer_class = BorrowRecordSerializer
+
+
+class ReturnBookAPIView(UpdateAPIView):
+    queryset = BorrowRecord.objects.all()
+    serializer_class = BorrowRecordSerializer
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        book_pk = self.kwargs.get("pk")
+        try:
+            book = get_object_or_404(Book, pk=book_pk)
+            borrowed_record = get_object_or_404(
+                BorrowRecord, user=user, book=book, is_returned=False
+            )
+
+            if borrowed_record:
+                # borrowed_record = serializer.save(is_returned=True, return_date=returned_date)
+                borrowed_record.is_returned = True
+                borrowed_record.return_date = timezone.now()
+                borrowed_record.save()
+
+                # Обновляем статус книги
+                book.status = "available"
+                book.save()
+
+            return Response(
+                {
+                    "message": "Книга успешно возвращена в библиотеку.",
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            # Для исключений тоже используем ValidationError
+            raise serializers.ValidationError(
+                {"error": f"Произошла ошибка при возврате книг: {str(e)}"}
+            )
