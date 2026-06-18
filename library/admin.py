@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from library.models import Author, Book
+from library.models import Author, Book, BorrowRecord
 
 
 @admin.register(Author)
@@ -33,4 +33,21 @@ class BookAdmin(admin.ModelAdmin):
         "status",
         "genre",
         "published_year",
+    )
+
+@admin.register(BorrowRecord)
+class BorrowRecordAdmin(admin.ModelAdmin):
+    """
+     Администрирование модели ВыдачаКниг(BorrowRecord).
+    Супер позволяет управлять выдачами книг.
+    """
+
+    list_display = (
+        "pk",
+        "book",
+        "user",
+        "borrow_date",
+        "return_date",
+        "is_returned",
+        "due_date"
     )
