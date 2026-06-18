@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
 
 from users.apps import UsersConfig
-from users.views import UserRegisterAPIView, VerifyEmailView
+from users.views import UserListAPIView, UserRegisterAPIView, VerifyEmailView
 
 app_name = UsersConfig.name
 
@@ -21,4 +21,5 @@ urlpatterns = [
     ),
     path("register/", UserRegisterAPIView.as_view(), name="register"),
     path("verify/<str:token>/", VerifyEmailView.as_view()),
+    path("users/", UserListAPIView.as_view(), name="users_list"),
 ]
