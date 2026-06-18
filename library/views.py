@@ -12,7 +12,9 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
 
 class BookViewSet(viewsets.ModelViewSet):
-    """CRUD для книг"""
+    """CRUD и фильтрация для книг"""
 
     serializer_class = BookSerializer
     queryset = Book.objects.all().order_by("pk")
+    # Указываем поля, по которым можно искать (точное совпадение)
+    filterset_fields = ["genre", "published_year", "title"]
