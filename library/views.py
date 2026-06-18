@@ -1,11 +1,12 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status, viewsets
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 
 from library.models import Author, Book, BorrowRecord
-from library.serializers import AuthorSerializer, BookSerializer, BorrowRecordSerializer
+from library.serializers import (AuthorSerializer, BookSerializer,
+                                 BorrowRecordSerializer)
 
 
 class AuthorViewSet(viewsets.ModelViewSet):
@@ -90,3 +91,8 @@ class BorrowBookApiView(CreateAPIView):
 
         # В случае ошибок возвращаем стандартный ответ DRF
         return response
+
+
+class BorrowBookListAPIView(ListAPIView):
+    queryset = BorrowRecord.objects.all()
+    serializer_class = BorrowRecordSerializer
