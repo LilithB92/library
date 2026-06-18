@@ -1,11 +1,12 @@
 import secrets
 
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from library.permissions import IsLibrarian
 from users.models import User
 from users.serializers import UserSerializer
 from users.services import EmailVerification
@@ -57,3 +58,11 @@ class VerifyEmailView(APIView):
                 {"error": "Invalid verification token."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class UserListAPIView(ListAPIView):
+    """Регистрация пользователя с верификацией почтой"""
+
+    queryset = User.objects.all().order_by("id")
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated, IsLibrarian)
