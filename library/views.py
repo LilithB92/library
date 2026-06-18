@@ -10,6 +10,7 @@ from library.models import Author, Book, BorrowRecord
 from library.permissions import IsLibrarian
 from library.serializers import (AuthorSerializer, BookSerializer,
                                  BorrowRecordSerializer)
+from library.services import send_email_to_readers
 
 
 class AuthorViewSet(viewsets.ModelViewSet):
@@ -49,6 +50,9 @@ class BorrowBookApiView(CreateAPIView):
                         book=book, is_returned=False
                     ).first()
                     if borrowed_book:
+                        send_email_to_readers(
+                            borrowed_book.user.email, user, book_pk, self.request
+                        )
                         # Выбрасываем исключение — DRF автоматически вернёт 400
                         raise serializers.ValidationError(
                             {
