@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_countries",
     "django_filters",
+    "drf_spectacular",
     "users",
     "library",
 ]
@@ -146,4 +147,14 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "API для управления библиотекой",
+    "DESCRIPTION": "Необходимо разработать REST API для управления библиотекой. "
+    "API должно предоставлять возможности для управления книгами, авторами и пользователями,"
+    " а также для отслеживания выдачи книг пользователям. "
+    "Для реализации API использовать Django Rest Framework (DRF).",
+    "VERSION": "1.0.0",
 }
