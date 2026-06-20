@@ -61,7 +61,7 @@ class VerifyEmailView(APIView):
 
 
 class UserListAPIView(ListAPIView):
-    """Регистрация пользователя с верификацией почтой"""
+    """Показывает список пользователей"""
 
     queryset = User.objects.all().order_by("id")
     serializer_class = UserSerializer
