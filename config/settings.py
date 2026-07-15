@@ -22,6 +22,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "unfold",#admin_style
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -153,8 +154,23 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "API для управления библиотекой",
     "DESCRIPTION": "Необходимо разработать REST API для управления библиотекой. "
-    "API должно предоставлять возможности для управления книгами, авторами и пользователями,"
-    " а также для отслеживания выдачи книг пользователям. "
-    "Для реализации API использовать Django Rest Framework (DRF).",
+                   "API должно предоставлять возможности для управления книгами, авторами и пользователями,"
+                   " а также для отслеживания выдачи книг пользователям. "
+                   "Для реализации API использовать Django Rest Framework (DRF).",
     "VERSION": "1.0.0",
+}
+
+# changed style of admin
+UNFOLD = {
+    # Последний пункт, необязателен. Будут доступны все темы для админ-панели
+    "SITE_TITLE": "API для управления библиотекой",  # Заголовок в браузере
+    "SITE_HEADER": "Админ-панель",           # Заголовок в шапке
+    "SITE_ICON": "/static/icon.svg",         # Путь к логотипу (SVG/PNG)
+    "THEME": "dark",  # "light", "dark" или "auto" (автоопределение)
+    "COLORS": {
+        "primary": {
+            "50": "#ffffff",
+            "100": "#dcfce7",
+        },
+    },
 }
