@@ -22,7 +22,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "unfold",#admin_style
+    "unfold",  # admin_style
+    "unfold.contrib.filters",  # admin_filter_style
+    "unfold.contrib.forms", #admins_style
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -164,8 +166,8 @@ SPECTACULAR_SETTINGS = {
 UNFOLD = {
     # Последний пункт, необязателен. Будут доступны все темы для админ-панели
     "SITE_TITLE": "API для управления библиотекой",  # Заголовок в браузере
-    "SITE_HEADER": "Админ-панель",           # Заголовок в шапке
-    "SITE_ICON": "/static/icon.svg",         # Путь к логотипу (SVG/PNG)
+    "SITE_HEADER": "Админ-панель",  # Заголовок в шапке
+    "SITE_ICON": "/static/icon.svg",  # Путь к логотипу (SVG/PNG)
     "THEME": "dark",  # "light", "dark" или "auto" (автоопределение)
     "COLORS": {
         "primary": {
