@@ -1,0 +1,143 @@
+:root {
+    --primary: #1a2332;
+    --accent: #2d6a4f;
+    --accent-hover: #1b4332;
+}
+
+body {
+    background-color: #f5f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.navbar-brand i {
+    color: #2d6a4f;
+}
+
+.page-header h1 {
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+pre.prettyprint {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.875rem;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-warning {
+    color: #000;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+}
+
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table th {
+    background-color: var(--primary);
+    color: white;
+}
+
+table td {
+    vertical-align: middle;
+}
+
+.errorlist {
+    color: #dc3545;
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+}
+
+.help-block {
+    color: #6c757d;
+    font-size: 0.8125rem;
+}
+
+input[type="text"], input[type="email"], input[type="password"],
+input[type="number"], input[type="url"], input[type="date"],
+input[type="datetime"], input[type="datetime-local"],
+select, textarea {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+}
+
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus,
+input[type="number"]:focus, input[type="url"]:focus, input[type="date"]:focus,
+input[type="datetime"]:focus, input[type="datetime-local"]:focus,
+select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(45,106,79,0.15);
+}
+
+label {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.modal-content {
+    border-radius: 12px;
+    border: none;
+}
+
+.modal-header {
+    border-bottom: 1px solid #e9ecef;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+}
+
+.pagination {
+    border-radius: 8px;
+}
+
+.page-link {
+    color: var(--accent);
+}
+
+.page-item.active .page-link {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
