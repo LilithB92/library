@@ -108,6 +108,33 @@ docker-compose up -d --build
 
 Это запустит контейнеры с базой данных PostgreSQL и вашим приложением Django.
 
+#### 5. Настройка базы данных:
+
+```bash
+python manage.py setup_database
+```
+
+Команда выполняет полную настройку:
+
+- Применяет миграции
+- Создаёт группу `Librarian`
+- Создаёт суперпользователя (`admin@gmail.com` / `admin1111`)
+- Создаёт библиотекаря (`librarian@gmail.com` / `librarian1111`)
+- Заполняет базу 8 авторами и 15 книгами с обложками
+
+Доступные флаги:
+
+```bash
+# Пропустить заполнение книгами
+python manage.py setup_database --skip-data
+
+# Указать свой email и пароль суперпользователя
+python manage.py setup_database --superuser-email my@email.com --superuser-password mypass123
+
+# Только пользователи, без миграций и книг
+python manage.py setup_database --skip-migrate --skip-data
+```
+
 ---
 
 ## 📦 Система контроля версий
@@ -149,7 +176,7 @@ Flake8 и Isort.
 | **Технология**                   | **Назначение**                                |
 |:---------------------------------|:----------------------------------------------|
 | **Backend**                      | Django, Django REST Framework (DRF)           |
-| **База данных**                  | PostgreSQL                                    ||
+| **База данных**                  | PostgresSQL                                    ||
 | **Тестирование API**             | Postman                                       |
 | **Система контроля версий**      | Git (модель GitFlow)                          |
 | **Окружение**                    | Виртуальное окружение Python (`venv`), Poetry |
