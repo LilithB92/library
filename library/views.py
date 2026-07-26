@@ -8,8 +8,7 @@ from rest_framework.response import Response
 
 from library.models import Author, Book, BorrowRecord
 from library.permissions import IsLibrarian
-from library.serializers import (AuthorSerializer, BookSerializer,
-                                 BorrowRecordSerializer)
+from library.serializers import AuthorSerializer, BookSerializer, BorrowRecordSerializer
 from library.services import send_email_to_readers
 
 

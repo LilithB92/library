@@ -2,8 +2,13 @@ from django.urls import path
 from rest_framework import routers
 
 from library.apps import LibraryConfig
-from library.views import (AuthorViewSet, BookViewSet, BorrowBookApiView,
-                           BorrowBookListAPIView, ReturnBookAPIView)
+from library.views import (
+    AuthorViewSet,
+    BookViewSet,
+    BorrowBookApiView,
+    BorrowBookListAPIView,
+    ReturnBookAPIView,
+)
 
 app_name = LibraryConfig.name
 
