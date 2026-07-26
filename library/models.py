@@ -53,6 +53,8 @@ class Book(models.Model):
     ]
     genre = models.CharField(max_length=25, choices=genre_choices, verbose_name="Жанр")
     published_year = models.PositiveSmallIntegerField(verbose_name="Год публикации")
+    pages = models.PositiveIntegerField(verbose_name="страницы", default=5)
+    book_cover = models.ImageField(verbose_name="обложка книг", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
