@@ -7,7 +7,7 @@ from library.views import (
     BookViewSet,
     BorrowBookApiView,
     BorrowBookListAPIView,
-    ReturnBookAPIView,
+    ReturnBookApiView,
 )
 
 app_name = LibraryConfig.name
@@ -16,12 +16,13 @@ router = routers.SimpleRouter()
 router.register(r"author", AuthorViewSet, basename="author")
 router.register(r"book", BookViewSet, basename="book")
 
-
 urlpatterns = [
     path("borrow/<int:pk>/book/", BorrowBookApiView.as_view(), name="borrow_book"),
-    path("return/<int:pk>/book/", ReturnBookAPIView.as_view(), name="return_book"),
+    path("return/<int:pk>/book/", ReturnBookApiView.as_view(), name="return_book"),
     path(
-        "borrow/records/", BorrowBookListAPIView.as_view(), name="list_borrowed_records"
+        "borrow/records/",
+        BorrowBookListAPIView.as_view(),
+        name="list_borrowed_records",
     ),
 ]
 
