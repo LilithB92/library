@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.db import models
+from django.utils import timezone
 from django_countries.fields import CountryField
 
 from config.settings import AUTH_USER_MODEL
@@ -67,22 +68,42 @@ class Book(models.Model):
 
 
 class BorrowRecord(models.Model):
-    """Сохраняет одну запись о выдачи книг, связанно с:models:`Book`, `User`,"""
+    """Сохраняет одну запись о выдаче книг, связанную с Book и User."""
 
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    book = models.ForeignKey(
+        Book, on_delete=models.CASCADE, related_name="borrow_records"
+    )
+    user = models.ForeignKey(
+        AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="borrow_records"
+    )
+    borrowed_by = models.ForeignKey(
+        AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="issued_records",
+        verbose_name="Кто выдал",
+    )
     borrow_date = models.DateTimeField(auto_now_add=True)
     return_date = models.DateTimeField(null=True, blank=True)
     is_returned = models.BooleanField(default=False)
 
     @property
     def due_date(self):
-        """Вычисляемая дата возврата."""
+        """Вычисляемая дата возврата (10 дней от выдачи)."""
         return self.borrow_date + timedelta(days=10)
 
+    @property
+    def is_overdue(self):
+        """Проверка просрочки: не возвращена и срок вышел."""
+        if self.is_returned:
+            return False
+        return timezone.now() > self.due_date
+
     def __str__(self):
-        return f"{self.user.full_name} - {self.book.title}"
+        return f"{self.user.full_name} — {self.book.title}"
 
     class Meta:
         verbose_name = "Выдача книг"
-        verbose_name_plural = "Выдачи книги"
+        verbose_name_plural = "Выдачи книг"
+        ordering = ["-borrow_date"]
