@@ -69,12 +69,11 @@ class BookSerializer(serializers.ModelSerializer):
 
 
 class BorrowRecordSerializer(serializers.ModelSerializer):
-    """
-    Сериалайзер для модели «Запись выдачи».
+    """Сериалайзер для модели «Запись выдачи»."""
 
-    Обрабатывает преобразование экземпляров «Запись выдачи» в формат JSON и выполняет валидацию
-    входящие данные для создания или обновления записи.
-    """
+    is_overdue = serializers.BooleanField(read_only=True)
+    user_email = serializers.CharField(source="user.email", read_only=True)
+    book_title = serializers.CharField(source="book.title", read_only=True)
 
     class Meta:
         model = BorrowRecord
@@ -82,10 +81,37 @@ class BorrowRecordSerializer(serializers.ModelSerializer):
             "pk",
             "book",
             "user",
+            "borrowed_by",
             "borrow_date",
             "due_date",
             "return_date",
             "is_returned",
+            "is_overdue",
+            "user_email",
+            "book_title",
         ]
-        read_only_fields = ["due_date", "borrow_date", "is_returned"]
-        extra_kwargs = {"book": {"required": False}, "user": {"required": False}}
+        read_only_fields = [
+            "due_date",
+            "borrow_date",
+            "is_returned",
+            "is_overdue",
+            "user_email",
+            "book_title",
+        ]
+        extra_kwargs = {
+            "book": {"required": False},
+            "user": {"required": False},
+            "borrowed_by": {"required": False},
+        }
+
+    def validate(self, data):
+        book = data.get("book") or getattr(self.instance, "book", None)
+        if book and book.status == "borrowed" and not self.instance:
+            active = BorrowRecord.objects.filter(
+                book=book, is_returned=False
+            ).first()
+            if active:
+                raise serializers.ValidationError(
+                    f"Книга уже выдана. Срок возврата: {active.due_date}."
+                )
+        return data
