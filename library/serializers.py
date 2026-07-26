@@ -46,6 +46,7 @@ class BookSerializer(serializers.ModelSerializer):
             "status",
             "genre",
             "published_year",
+            "pages",
             "created_at",
             "updated_at",
         )
