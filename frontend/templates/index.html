@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Каталог книг — Библиотека{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-book-half"></i> Каталог книг</h1>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <form method="get" class="card card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    {{ form.title }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.genre }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.status }}
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if page_obj %}
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+    {% for book in page_obj %}
+    <div class="col">
+        <a href="#" class="text-decoration-none">
+            <div class="card book-card h-100">
+                {% if book.book_cover %}
+                <img src="{{ book.book_cover.url }}" class="book-cover-img" alt="{{ book.title }}">
+                {% else %}
+                <div class="book-cover-placeholder">
+                    <i class="bi bi-book"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h6 class="card-title text-dark">{{ book.title }}</h6>
+                    <p class="text-muted small mb-1">
+                        {% for author in book.authors.all %}{{ author.full_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="badge {% if book.status == 'available' %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ book.get_status_display }}
+                        </span>
+                        <small class="text-muted">{{ book.published_year }}</small>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.title %}&title={{ request.GET.title }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% if request.GET.title %}&title={{ request.GET.title }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">{{ num }}</a>
+        </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.title %}&title={{ request.GET.title }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-book text-muted" style="font-size: 4rem;"></i>
+    <h4 class="mt-3">Книги не найдены</h4>
+    <p class="text-muted">Попробуйте изменить параметры поиска</p>
+</div>
+{% endif %}
+{% endblock %}
