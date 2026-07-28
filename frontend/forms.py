@@ -1,6 +1,7 @@
 from django import forms
 
 from library.models import Author, Book
+from users.models import User
 
 
 class BookSearchForm(forms.Form):
@@ -70,4 +71,81 @@ class AuthorForm(forms.ModelForm):
                 attrs={"class": "form-control", "type": "date"}
             ),
             "nationality": forms.Select(attrs={"class": "form-select"}),
+        }
+
+
+class LoginForm(forms.Form):
+    email = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(
+            attrs={"class": "form-control", "placeholder": "Введите email"}
+        ),
+    )
+    password = forms.CharField(
+        label="Пароль",
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Введите пароль"}
+        ),
+    )
+
+
+class RegisterForm(forms.ModelForm):
+    password = forms.CharField(
+        label="Пароль",
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Введите пароль"}
+        ),
+    )
+    password_confirm = forms.CharField(
+        label="Подтверждение пароля",
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Подтвердите пароль"}
+        ),
+    )
+
+    class Meta:
+        model = User
+        fields = ("full_name", "email", "phone_number", "address")
+        widgets = {
+            "full_name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "ФИО"}
+            ),
+            "email": forms.EmailInput(
+                attrs={"class": "form-control", "placeholder": "Email"}
+            ),
+            "phone_number": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Телефон (необязательно)"}
+            ),
+            "address": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Адрес (необязательно)"}
+            ),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        password_confirm = cleaned_data.get("password_confirm")
+        if password and password_confirm and password != password_confirm:
+            raise forms.ValidationError("Пароли не совпадают.")
+        return cleaned_data
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("full_name", "email", "phone_number", "address", "avatar")
+        widgets = {
+            "full_name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "ФИО"}
+            ),
+            "email": forms.EmailInput(
+                attrs={"class": "form-control", "placeholder": "Email"}
+            ),
+            "phone_number": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Телефон"}
+            ),
+            "address": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Адрес"}
+            ),
+            "avatar": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }
