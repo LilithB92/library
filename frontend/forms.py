@@ -149,3 +149,20 @@ class ProfileForm(forms.ModelForm):
             ),
             "avatar": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }
+
+
+class BorrowForm(forms.Form):
+    user = forms.ModelChoiceField(
+        queryset=User.objects.filter(is_active=True).order_by("full_name"),
+        label="Читатель",
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+    def __init__(self, *args, show_user_select=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not show_user_select:
+            self.fields["user"].widget = forms.HiddenInput()
+        else:
+            self.fields["user"].required = True
+            self.fields["user"].empty_label = "-- Выберите читателя --"
