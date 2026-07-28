@@ -1,10 +1,10 @@
 from django.core.paginator import Paginator
 from django.shortcuts import redirect
-from django.views.generic import CreateView, DeleteView, DetailView, TemplateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView
 
-from library.models import Book
+from library.models import Author, Book
 
-from .forms import BookForm, BookSearchForm
+from .forms import AuthorForm, BookForm, BookSearchForm
 from .permissions import is_librarian
 
 
@@ -71,6 +71,51 @@ class BookDeleteView(LibrarianRequiredMixin, DeleteView):
     model = Book
     template_name = "books/delete.html"
     success_url = "frontend:index"
+
+    def form_valid(self, form):
+        self.object.delete()
+        return redirect(self.get_success_url())
+
+
+class AuthorListView(ListView):
+    model = Author
+    template_name = "authors/list.html"
+    context_object_name = "authors"
+    ordering = "full_name"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_librarian"] = is_librarian(self.request.user)
+        return context
+
+
+class AuthorDetailView(DetailView):
+    model = Author
+    template_name = "authors/detail.html"
+    context_object_name = "author"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["books"] = self.object.books.all().order_by("-published_year")
+        context["is_librarian"] = is_librarian(self.request.user)
+        return context
+
+
+class AuthorCreateView(LibrarianRequiredMixin, CreateView):
+    model = Author
+    form_class = AuthorForm
+    template_name = "authors/create.html"
+    success_url = "frontend:author_list"
+
+    def form_valid(self, form):
+        form.save()
+        return redirect(self.get_success_url())
+
+
+class AuthorDeleteView(LibrarianRequiredMixin, DeleteView):
+    model = Author
+    template_name = "authors/delete.html"
+    success_url = "frontend:author_list"
 
     def form_valid(self, form):
         self.object.delete()
