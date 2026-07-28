@@ -1,6 +1,6 @@
 from django import forms
 
-from library.models import Book
+from library.models import Author, Book
 
 
 class BookSearchForm(forms.Form):
@@ -52,4 +52,22 @@ class BookForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Количество страниц"}
             ),
             "book_cover": forms.ClearableFileInput(attrs={"class": "form-control"}),
+        }
+
+
+class AuthorForm(forms.ModelForm):
+    class Meta:
+        model = Author
+        fields = ("full_name", "date_of_birth", "date_of_death", "nationality")
+        widgets = {
+            "full_name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "ФИО автора"}
+            ),
+            "date_of_birth": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            ),
+            "date_of_death": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            ),
+            "nationality": forms.Select(attrs={"class": "form-select"}),
         }
