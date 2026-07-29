@@ -4,14 +4,17 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.shortcuts import redirect
+from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
 
-from library.models import Author, Book
+from library.models import Author, Book, BorrowRecord
+from library.services import send_borrow_email, send_return_email
 from users.models import User
 
-from .forms import AuthorForm, BookForm, BookSearchForm, LoginForm, ProfileForm, RegisterForm
+from .forms import AuthorForm, BookForm, BookSearchForm, BorrowForm, LoginForm, ProfileForm, RegisterForm
 from .permissions import is_librarian
 
 
@@ -51,8 +54,27 @@ class BookDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["authors"] = self.object.authors.all()
+        book = self.object
+        context["authors"] = book.authors.all()
         context["is_librarian"] = is_librarian(self.request.user)
+
+        user_can_borrow = False
+        user_active_borrow = None
+        if self.request.user.is_authenticated:
+            user_active_borrow = BorrowRecord.objects.filter(
+                book=book, user=self.request.user, is_returned=False
+            ).first()
+            if book.status == "available" and not user_active_borrow:
+                user_can_borrow = True
+
+        context["user_can_borrow"] = user_can_borrow
+        context["user_active_borrow"] = user_active_borrow
+
+        if is_librarian(self.request.user):
+            context["borrow_form"] = BorrowForm(show_user_select=True)
+        else:
+            context["borrow_form"] = BorrowForm()
+
         return context
 
 
@@ -215,3 +237,123 @@ class LogoutView(View):
     def get(self, request):
         logout(request)
         return redirect("frontend:index")
+
+
+class BorrowBookView(LoginRequiredMixin, FormView):
+    form_class = BorrowForm
+    template_name = "books/detail.html"
+
+    def form_valid(self, form):
+        book = Book.objects.get(pk=self.kwargs["pk"])
+        user = self.request.user
+        librarian = is_librarian(user)
+
+        if librarian:
+            target_user = form.cleaned_data.get("user")
+            if not target_user:
+                messages.error(self.request, "Выберите читателя.")
+                return redirect("frontend:book_detail", pk=book.pk)
+        else:
+            target_user = user
+
+        with transaction.atomic():
+            if book.status == "borrowed":
+                active = BorrowRecord.objects.filter(
+                    book=book, is_returned=False
+                ).first()
+                if active:
+                    messages.error(
+                        self.request,
+                        f"Книга уже выдана. Срок возврата: {active.due_date}.",
+                    )
+                    return redirect("frontend:book_detail", pk=book.pk)
+
+            record = BorrowRecord.objects.create(
+                book=book,
+                user=target_user,
+                borrowed_by=user,
+            )
+            book.status = "borrowed"
+            book.save()
+
+        send_borrow_email(target_user.email, book.title, record.due_date)
+
+        name = target_user.full_name or target_user.email
+        messages.success(
+            self.request, f"Книга «{book.title}» выдана {name}."
+        )
+        return redirect("frontend:borrow_records")
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Ошибка формы выдачи.")
+        return redirect("frontend:book_detail", pk=self.kwargs["pk"])
+
+
+class ReturnBookView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        book = Book.objects.get(pk=pk)
+        user = request.user
+        librarian = is_librarian(user)
+
+        with transaction.atomic():
+            if librarian:
+                record = BorrowRecord.objects.filter(
+                    book=book, is_returned=False
+                ).first()
+            else:
+                record = BorrowRecord.objects.filter(
+                    book=book, user=user, is_returned=False
+                ).first()
+
+            if not record:
+                messages.error(
+                    request, "Активная запись выдачи не найдена."
+                )
+                return redirect("frontend:book_detail", pk=pk)
+
+            record.is_returned = True
+            record.return_date = timezone.now()
+            record.save()
+
+            book.status = "available"
+            book.save()
+
+        send_return_email(record.user.email, book.title)
+
+        messages.success(
+            request, f"Книга «{book.title}» возвращена!"
+        )
+        return redirect("frontend:borrow_records")
+
+
+class BorrowRecordsView(LoginRequiredMixin, TemplateView):
+    template_name = "borrow/records.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        librarian = is_librarian(user)
+
+        if librarian:
+            base_qs = BorrowRecord.objects.select_related("book", "user")
+        else:
+            base_qs = BorrowRecord.objects.filter(user=user).select_related(
+                "book", "user"
+            )
+
+        filter_param = self.request.GET.get("filter", "active")
+
+        if filter_param == "returned":
+            records = base_qs.filter(is_returned=True).order_by("-return_date")[:30]
+        elif filter_param == "overdue":
+            threshold = timezone.now() - timezone.timedelta(days=10)
+            records = base_qs.filter(
+                is_returned=False, borrow_date__lt=threshold
+            ).order_by("borrow_date")
+        else:
+            records = base_qs.filter(is_returned=False).order_by("-borrow_date")
+
+        context["records"] = records
+        context["current_filter"] = filter_param
+        context["is_librarian"] = librarian
+        return context
