@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Выдачи — Библиотека{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="bi bi-journal-bookmark"></i>
+    {% if is_librarian %}Все выдачи{% else %}Мои выдачи{% endif %}
+</h1>
+
+<div class="btn-group mb-4" role="group">
+    <a href="?filter=active" class="btn {% if current_filter == 'active' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        <i class="bi bi-clock-history"></i> Активные
+    </a>
+    <a href="?filter=returned" class="btn {% if current_filter == 'returned' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        <i class="bi bi-check-circle"></i> Возвращенные
+    </a>
+    <a href="?filter=overdue" class="btn {% if current_filter == 'overdue' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+        <i class="bi bi-exclamation-triangle"></i> Просроченные
+    </a>
+</div>
+
+{% if records %}
+<div class="row row-cols-1 row-cols-md-2 g-3">
+    {% for record in records %}
+    <div class="col">
+        <div class="card borrow-record-item h-100 {% if record.is_returned %}returned{% elif record.is_overdue %}border-danger{% endif %}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="card-title mb-1">
+                            <a href="{% url 'frontend:book_detail' pk=record.book.pk %}" class="text-decoration-none text-dark">{{ record.book.title }}</a>
+                        </h5>
+                        {% if is_librarian %}
+                        <p class="text-muted small mb-1">
+                            <i class="bi bi-person"></i> Читатель: <strong>{{ record.user.full_name|default:record.user.email }}</strong>
+                        </p>
+                        {% endif %}
+                        <p class="text-muted small mb-1">
+                            <i class="bi bi-calendar3"></i> Выдана: {{ record.borrow_date|date:"d.m.Y H:i" }}
+                        </p>
+                        <p class="text-muted small mb-1">
+                            <i class="bi bi-clock"></i> Срок возврата: {{ record.due_date|date:"d.m.Y" }}
+                        </p>
+                        {% if record.return_date %}
+                        <p class="text-muted small mb-1">
+                            <i class="bi bi-check-lg"></i> Возвращена: {{ record.return_date|date:"d.m.Y" }}
+                        </p>
+                        {% endif %}
+                        {% if record.is_returned %}
+                        <span class="badge bg-secondary"><i class="bi bi-check-lg"></i> Возвращена</span>
+                        {% elif record.is_overdue %}
+                        <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Просрочена</span>
+                        {% else %}
+                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Ожидает возврата</span>
+                        {% endif %}
+                    </div>
+                    {% if not record.is_returned %}
+                    <form method="post" action="{% url 'frontend:return_book' pk=record.book.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-arrow-return-left"></i> Вернуть
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-4">
+    <i class="bi bi-journal-check text-muted" style="font-size: 3rem;"></i>
+    {% if current_filter == "active" %}
+    <h5 class="mt-2">Нет активных выдач</h5>
+    {% elif current_filter == "returned" %}
+    <h5 class="mt-2">Нет возвращенных книг</h5>
+    {% elif current_filter == "overdue" %}
+    <h5 class="mt-2">Нет просроченных книг</h5>
+    {% endif %}
+    <p class="text-muted"><a href="{% url 'frontend:index' %}">Перейти в каталог</a></p>
+</div>
+{% endif %}
+{% endblock %}

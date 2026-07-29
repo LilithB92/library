@@ -18,7 +18,7 @@
                     <h1 class="mb-2">{{ book.title }}</h1>
                     <p class="mb-0 opacity-75">
                         {% for author in authors %}
-                        {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+                        <a href="{% url 'frontend:author_detail' pk=author.pk %}" class="text-white text-decoration-underline">{{ author.full_name }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </p>
                 </div>
@@ -60,33 +60,94 @@
                     </div>
                 </div>
 
-                {% if is_librarian %}
                 <hr>
-                <a href="{% url 'frontend:book_delete' pk=book.pk %}" class="btn btn-outline-danger btn-sm">
-                    <i class="bi bi-trash"></i> Удалить книгу
-                </a>
+                {% if user.is_authenticated %}
+                    {% if user_can_borrow %}
+                    <form method="post" action="{% url 'frontend:borrow_book' pk=book.pk %}">
+                        {% csrf_token %}
+                        {% if is_librarian %}
+                        <div class="mb-3">
+                            <label for="id_user" class="form-label fw-bold">Выдать читателю:</label>
+                            {{ borrow_form.user }}
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-accent btn-lg">
+                            <i class="bi bi-bookmark-plus"></i> Взять книгу
+                        </button>
+                    </form>
+                    {% elif user_active_borrow %}
+                    <p class="text-muted mb-2">
+                        <i class="bi bi-clock-history"></i> Выдана вам до <strong>{{ user_active_borrow.due_date|date:"d.m.Y" }}</strong>
+                        {% if user_active_borrow.is_overdue %}
+                        <span class="badge bg-danger ms-2">Просрочена</span>
+                        {% endif %}
+                    </p>
+                    <form method="post" action="{% url 'frontend:return_book' pk=book.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-arrow-return-left"></i> Вернуть книгу
+                        </button>
+                    </form>
+                    {% elif book.status == 'borrowed' %}
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-info-circle"></i> Книга выдана другому читателю.
+                    </p>
+                    {% endif %}
+                    {% if is_librarian %}
+                    <div class="mt-3">
+                        <a href="{% url 'frontend:book_delete' pk=book.pk %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i> Удалить книгу
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                <p class="text-muted mb-0">
+                    <a href="{% url 'frontend:login' %}">Войдите</a>, чтобы взять эту книгу.
+                </p>
                 {% endif %}
             </div>
         </div>
     </div>
 
     <div class="col-lg-4">
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title mb-3"><i class="bi bi-people"></i> Авторы</h5>
                 {% for author in authors %}
                 <div class="d-flex align-items-center mb-3">
                     <div class="author-avatar-sm me-3">{{ author.full_name|first }}</div>
                     <div>
-                        <div class="fw-bold">{{ author.full_name }}</div>
+                        <a href="{% url 'frontend:author_detail' pk=author.pk %}" class="text-decoration-none fw-bold">{{ author.full_name }}</a>
                         {% if author.nationality %}
-                        <small class="text-muted">{{ author.nationality.name }}</small>
+                        <br><small class="text-muted">{{ author.nationality.name }}</small>
                         {% endif %}
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
+
+        {% if borrow_records %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3"><i class="bi bi-clock-history"></i> История выдач</h5>
+                {% for record in borrow_records %}
+                <div class="borrow-record-item {% if record.is_returned %}returned{% endif %} p-2 mb-2">
+                    <small>
+                        <strong>{{ record.user.full_name|default:record.user.email }}</strong><br>
+                        {{ record.borrow_date|date:"d.m.Y" }}
+                        {% if record.is_returned %} — {{ record.return_date|date:"d.m.Y" }}
+                        {% else %}
+                            {% if record.is_overdue %}
+                            <span class="badge bg-danger">Просрочена</span>
+                            {% endif %}
+                        {% endif %}
+                    </small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
