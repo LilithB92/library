@@ -8,6 +8,8 @@ urlpatterns = [
     path("", views.IndexView.as_view(), name="index"),
     path("books/create/", views.BookCreateView.as_view(), name="book_create"),
     path("books/<int:pk>/", views.BookDetailView.as_view(), name="book_detail"),
+    path("books/<int:pk>/borrow/", views.BorrowBookView.as_view(), name="borrow_book"),
+    path("books/<int:pk>/return/", views.ReturnBookView.as_view(), name="return_book"),
     path("books/<int:pk>/delete/", views.BookDeleteView.as_view(), name="book_delete"),
     path("authors/", views.AuthorListView.as_view(), name="author_list"),
     path("authors/create/", views.AuthorCreateView.as_view(), name="author_create"),
@@ -17,5 +19,6 @@ urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
     path("verify/<str:token>/", views.VerifyView.as_view(), name="verify"),
     path("profile/", views.ProfileView.as_view(), name="profile"),
+    path("borrow/records/", views.BorrowRecordsView.as_view(), name="borrow_records"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
 ]
